@@ -7,5 +7,4 @@ def token() -> str:
 
 
 if __name__ == "__main__":
-    client = ucBot()
-    client.run(token())
+    ucBot.run(token())
