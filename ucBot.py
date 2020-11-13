@@ -39,6 +39,12 @@ async def on_ready():
     )
 
 
+@ucBot.event
+async def on_command(ctx: commands.Context):
+    print(f"{ctx.author.name}#{ctx.author.discriminator} <{ctx.author.id}>: " +
+          f"{ctx.message.content}")
+
+
 @ucBot.command(
     help="Displays basic stats of a user, if no username is given " +
     "then it will attempt to look for your current UC Discord nickname")
