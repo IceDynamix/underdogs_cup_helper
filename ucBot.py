@@ -1,11 +1,13 @@
 import discord
 from discord.ext import commands
+import sys
 
 from player_list import player_list
 from tetrio import retrieve_data
 from settings import settings
 
-settings = settings("debug")
+profile = sys.argv[1] if len(sys.argv) > 1 else "debug"
+settings = settings(profile)
 ucBot = commands.Bot(command_prefix="!")
 player_list = player_list(settings)
 
