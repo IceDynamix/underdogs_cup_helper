@@ -30,13 +30,13 @@ async def on_ready():
     )
 
 
-@ucBot.command()
+@ucBot.command(hidden=True)
 @commands.is_owner()
 async def echo(ctx: commands.Context, arg: str):
     await ctx.send(arg)
 
 
-@ucBot.command()
+@ucBot.command(hidden=True)
 @commands.is_owner()
 async def toggle(ctx: commands.Context):
     role = ctx.guild.get_role(PARTICIPANT_ROLE)
@@ -48,7 +48,7 @@ async def toggle(ctx: commands.Context):
         await ctx.send("removed role")
 
 
-@ucBot.command()
+@ucBot.command(help="Registers you to the ongoing tournament")
 async def register(ctx: commands.Context, username: str = None):
     role = ctx.guild.get_role(PARTICIPANT_ROLE)
 
@@ -100,7 +100,7 @@ async def register(ctx: commands.Context, username: str = None):
     )
 
 
-@ucBot.command()
+@ucBot.command(help="Unregister from the tournament if necessary")
 async def unregister(ctx: commands.Context):
     role = ctx.guild.get_role(PARTICIPANT_ROLE)
 
