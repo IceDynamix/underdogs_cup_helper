@@ -3,17 +3,16 @@ from discord.ext import commands
 
 from player_list import player_list
 from tetrio import retrieve_data
+from settings import settings
 
-BOT_CHANNEL = 477999746070347787
-PARTICIPANT_ROLE = 228485722284228608
-
+settings = settings("debug")
 ucBot = commands.Bot(command_prefix="!")
-player_list = player_list()
+player_list = player_list(settings)
 
 
 @ucBot.check
 async def only_in_bot_channel(ctx: commands.Context):
-    return ctx.channel.id == BOT_CHANNEL
+    return ctx.channel.id == settings.discord.channel
 
 
 @ucBot.check
@@ -39,7 +38,7 @@ async def echo(ctx: commands.Context, arg: str):
 @ucBot.command(hidden=True)
 @commands.is_owner()
 async def toggle(ctx: commands.Context):
-    role = ctx.guild.get_role(PARTICIPANT_ROLE)
+    role = ctx.guild.get_role(settings.discord.role)
     if role not in ctx.author.roles:
         await ctx.author.add_roles(role)
         await ctx.send("added role")
@@ -50,7 +49,7 @@ async def toggle(ctx: commands.Context):
 
 @ucBot.command(help="Registers you to the ongoing tournament")
 async def register(ctx: commands.Context, username: str = None):
-    role = ctx.guild.get_role(PARTICIPANT_ROLE)
+    role = ctx.guild.get_role(settings.discord.role)
 
     if not username:
         username = ctx.author.display_name
@@ -94,15 +93,16 @@ async def register(ctx: commands.Context, username: str = None):
     player_list.add(ctx.author.id, ctx.author.name, username)
     player_list.update_spreadsheet()
 
-    await ctx.author.add_roles(ctx.guild.get_role(PARTICIPANT_ROLE))
+    await ctx.author.add_roles(ctx.guild.get_role(settings.discord.role))
     await ctx.send(
-        f"Registered Discord user {ctx.discord.name} as player {username}"
+        "Registered Discord user " +
+        f"{ctx.author.name}#{ctx.author.discriminator} as player {username}"
     )
 
 
 @ucBot.command(help="Unregister from the tournament if necessary")
 async def unregister(ctx: commands.Context):
-    role = ctx.guild.get_role(PARTICIPANT_ROLE)
+    role = ctx.guild.get_role(settings.discord.role)
 
     if role not in ctx.author.roles:
         await ctx.send("Not registered")
@@ -111,7 +111,10 @@ async def unregister(ctx: commands.Context):
     player_list.remove(ctx.author.id)
     player_list.update_spreadsheet()
     await ctx.author.remove_roles(role)
-    await ctx.send("Unregistered player")
+    await ctx.send(
+        "Unregistered Discord user " +
+        f"{ctx.author.name}#{ctx.author.discriminator}"
+    )
 
 
 if __name__ == "__main__":

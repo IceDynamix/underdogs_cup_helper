@@ -1,0 +1,22 @@
+{
+    "debug": {
+        "discord": {
+            "channel": 477999746070347787,
+            "role": 228485722284228608
+        },
+        "spreadsheet": {
+            "spreadsheet_id": "12ofvIJ0BI80Qz_GgU35nPlbsm4MVuOzxIx1D8l5iCnM",
+            "registration_range": "regs!A2:D"
+        }
+    },
+    "uc5": {
+        "discord": {
+            "channel": 0,
+            "role": 0
+        },
+        "spreadsheet": {
+            "spreadsheet_id": "",
+            "registration_range": ""
+        }
+    }
+}

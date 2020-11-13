@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from gsheet import spreadsheet
+from settings import settings
 
 
 @dataclass
@@ -36,22 +37,23 @@ class player():
 
 
 class player_list():
-    sheet_range = "A2:D"
-
-    def __init__(self):
-        self.spreadsheet = spreadsheet()
+    def __init__(self, settings: settings):
+        self.settings = settings
+        self.spreadsheet = spreadsheet(settings)
         self.read_spreadsheet()
 
     def read_spreadsheet(self):
-        rows = self.spreadsheet.read_range(self.sheet_range)
+        rows = self.spreadsheet.read_range(
+            self.settings.spreadsheet.registration_range)
         self.player_list = [
             player.from_row(row) for row in rows if len(row) == 4
         ]
 
     def update_spreadsheet(self):
-        self.spreadsheet.clear_range(self.sheet_range)
+        self.spreadsheet.clear_range(
+            self.settings.spreadsheet.registration_range)
         self.spreadsheet.write_range(
-            self.sheet_range,
+            self.settings.spreadsheet.registration_range,
             [p.to_row() for p in self.player_list]
         )
 
@@ -89,6 +91,7 @@ class player_list():
 
 
 if __name__ == "__main__":
-    p = player_list()
-    print(p.player_list)
+    p = player_list(settings("debug"))
     print(p.player_list[0].to_row())
+    p.remove(126806732889522000)
+    p.update_spreadsheet()

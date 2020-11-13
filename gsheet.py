@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import os.path
 import pickle
+from settings import settings
 
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -9,14 +10,13 @@ from googleapiclient.discovery import build
 
 
 class spreadsheet:
-    def __init__(self):
+    def __init__(self, settings: settings):
+        self.settings = settings
         self.service = build(
             "sheets", "v4", credentials=self.__credentials()
         ).spreadsheets()
 
     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-    spreadsheet_id = "12ofvIJ0BI80Qz_GgU35nPlbsm4MVuOzxIx1D8l5iCnM"
-    sheet_name = "regs"
 
     def __credentials(self):
         creds = None
@@ -36,26 +36,23 @@ class spreadsheet:
         return creds
 
     def read_range(self, a1notation: str) -> list:
-        sheet_range = f"{self.sheet_name}!{a1notation}"
         result = self.service.values().get(
-            spreadsheetId=self.spreadsheet_id,
-            range=sheet_range
+            spreadsheetId=self.settings.spreadsheet.spreadsheet_id,
+            range=a1notation
         ).execute()
 
         return result.get("values", [])
 
     def write_range(self, a1notation: str, values: list) -> None:
-        sheet_range = f"{self.sheet_name}!{a1notation}"
         self.service.values().update(
-            spreadsheetId=self.spreadsheet_id,
-            range=sheet_range,
+            spreadsheetId=self.settings.spreadsheet.spreadsheet_id,
+            range=a1notation,
             valueInputOption="USER_ENTERED",
             body={"values": values}
         ).execute()
 
     def clear_range(self, a1notation) -> None:
-        sheet_range = f"{self.sheet_name}!{a1notation}"
         self.service.values().clear(
-            spreadsheetId=self.spreadsheet_id,
-            range=sheet_range
+            spreadsheetId=self.settings.spreadsheet.spreadsheet_id,
+            range=a1notation
         ).execute()
