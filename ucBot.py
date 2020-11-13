@@ -5,6 +5,7 @@ import sys
 from player_list import player_list
 import tetrio
 from settings import settings
+from time import time
 
 profile = sys.argv[1] if len(sys.argv) > 1 else "debug"
 settings = settings(profile)
@@ -27,7 +28,7 @@ async def on_ready():
     print("ucBot online")
     await ucBot.change_presence(
         status=discord.Status.online,
-        activity=discord.CustomActivity("Registrations are open!")
+        activity=discord.CustomActivity("i like cheese")
     )
 
 
@@ -47,6 +48,18 @@ async def toggle(ctx: commands.Context):
     else:
         await ctx.author.remove_roles(role)
         await ctx.send("removed role")
+
+
+@ucBot.command(hidden=True)
+@commands.is_owner()
+async def update_cache(ctx: commands.Context):
+    start = time()
+    date = tetrio.retrieve_data("players", False)["date"]
+    end = time()
+    await ctx.send(
+        "Updated cache, " +
+        "took {:.2f} seconds, ".format(end - start) +
+        "last data from {}".format(date))
 
 
 @ucBot.command(
