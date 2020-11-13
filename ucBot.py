@@ -3,7 +3,7 @@ from discord.ext import commands
 import sys
 
 from player_list import player_list
-from tetrio import retrieve_data
+import tetrio
 from settings import settings
 
 profile = sys.argv[1] if len(sys.argv) > 1 else "debug"
@@ -49,6 +49,19 @@ async def toggle(ctx: commands.Context):
         await ctx.send("removed role")
 
 
+@ucBot.command()
+async def stats(ctx: commands.Context, username: str = None):
+    if not username:
+        username = ctx.author.display_name
+    username = username.lower()
+
+    embed = tetrio.generate_embed(username)
+    if embed:
+        await ctx.send(embed=embed)
+    else:
+        await ctx.send(f"Could not find player `{username}`")
+
+
 @ucBot.command(help="Registers you to the ongoing tournament")
 async def register(ctx: commands.Context, username: str = None):
     role = ctx.guild.get_role(settings.discord.role)
@@ -65,7 +78,7 @@ async def register(ctx: commands.Context, username: str = None):
         await ctx.send("Tetr.io username already registered")
         return
 
-    playerbase_data = retrieve_data("players")
+    playerbase_data = tetrio.retrieve_data("players")
 
     # check if valid
 
