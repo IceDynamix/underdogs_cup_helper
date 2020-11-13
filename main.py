@@ -91,9 +91,13 @@ async def register(ctx: commands.Context, username: str = None):
     if ctx.author.display_name != username and not commands.is_owner():
         await ctx.author.edit(nick=username)
 
-    await ctx.author.add_roles(ctx.guild.get_role(PARTICIPANT_ROLE))
+    player_list.add(ctx.author.id, ctx.author.name, username)
+    player_list.update_spreadsheet()
 
-    # TODO Add to player list
+    await ctx.author.add_roles(ctx.guild.get_role(PARTICIPANT_ROLE))
+    await ctx.send(
+        f"Registered Discord user {ctx.discord.name} as player {username}"
+    )
 
 
 @ucBot.command()
@@ -104,10 +108,11 @@ async def unregister(ctx: commands.Context):
         await ctx.send("Not registered")
         return
 
+    player_list.remove(ctx.author.id)
+    player_list.update_spreadsheet()
     await ctx.author.remove_roles(role)
     await ctx.send("Unregistered player")
 
-    # TODO Remove from player list
 
 if __name__ == "__main__":
     with open("./credentials/token.secret") as tokenFile:

@@ -23,8 +23,12 @@ class player():
         )
 
     def to_row(self):
+        if type(self.reg_timestamp) == datetime:
+            timestamp = self.reg_timestamp.strftime(self.date_format)
+        else:
+            timestamp = self.reg_timestamp
         return [
-            self.reg_timestamp.strftime(self.date_format),
+            timestamp,
             self.discord_id,
             self.discord_tag,
             self.username
@@ -41,7 +45,7 @@ class player_list():
     def read_spreadsheet(self):
         rows = self.spreadsheet.read_range(self.sheet_range)
         self.player_list = [
-            player.from_row(row) for row in rows
+            player.from_row(row) for row in rows if len(row) == 4
         ]
 
     def update_spreadsheet(self):
@@ -53,9 +57,14 @@ class player_list():
 
     def add(self, discord_id: int,
             discord_tag: str, username: str):
-        timestamp = datetime.utcnow().strftime(self.date_format)
+        timestamp = datetime.utcnow().strftime(player.date_format)
         self.player_list.append(
-            player(timestamp, discord_id, discord_tag, username.lower())
+            player(
+                reg_timestamp=timestamp,
+                discord_id=discord_id,
+                discord_tag=discord_tag,
+                username=username.lower()
+            )
         )
 
         return True
@@ -77,3 +86,9 @@ class player_list():
             p for p in self.player_list
             if p.discord_id != discord_id
         ]
+
+
+if __name__ == "__main__":
+    p = player_list()
+    print(p.player_list)
+    print(p.player_list[0].to_row())
