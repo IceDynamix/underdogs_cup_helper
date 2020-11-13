@@ -49,7 +49,9 @@ async def toggle(ctx: commands.Context):
         await ctx.send("removed role")
 
 
-@ucBot.command()
+@ucBot.command(
+    help="Displays basic stats of a user, if no username is given " +
+    "then it will attempt to look for your current UC Discord nickname")
 async def stats(ctx: commands.Context, username: str = None):
     if not username:
         username = ctx.author.display_name
