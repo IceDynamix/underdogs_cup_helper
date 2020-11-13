@@ -1,5 +1,6 @@
 from time import time
 
+import discord
 from discord.ext import commands
 from settings_manager import settings_manager
 import tetrio
@@ -29,7 +30,6 @@ class owner(commands.Cog):
             await ctx.send("removed role")
 
     @commands.command(hidden=True)
-    @commands.is_owner()
     async def update_cache(self, ctx: commands.Context):
         start = time()
         date = tetrio.retrieve_data("players", False)["date"]
@@ -38,3 +38,13 @@ class owner(commands.Cog):
             "Updated cache, " +
             "took {:.2f} seconds, ".format(end - start) +
             "last data from {}".format(date))
+
+    @commands.command(hidden=True)
+    async def setup_check_in(self, ctx: commands.Context):
+        embed = discord.Embed(
+            title="Check-in",
+            description="Please react to this message with the " +
+            "green checkmark to check in!"
+        )
+        check_in_message = await ctx.send(embed=embed)
+        await check_in_message.add_reaction("✅")
