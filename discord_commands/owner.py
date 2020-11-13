@@ -48,3 +48,4 @@ class owner(commands.Cog):
         )
         check_in_message = await ctx.send(embed=embed)
         await check_in_message.add_reaction("✅")
+        print(f"Created check-in message <{check_in_message.id}>")
