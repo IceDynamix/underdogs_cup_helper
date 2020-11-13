@@ -2,7 +2,7 @@ from __future__ import print_function
 
 import os.path
 import pickle
-from settings import settings
+from settings_manager import settings_manager
 
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -10,7 +10,7 @@ from googleapiclient.discovery import build
 
 
 class spreadsheet:
-    def __init__(self, settings: settings):
+    def __init__(self, settings: settings_manager):
         self.settings = settings
         self.service = build(
             "sheets", "v4", credentials=self.__credentials()

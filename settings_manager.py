@@ -22,7 +22,7 @@ class spreadsheet_settings():
         self.registration_range = settings["spreadsheet"]["registration_range"]
 
 
-class settings():
+class settings_manager():
     path = "settings.json"
 
     def __init__(self, profile: str):
@@ -30,3 +30,6 @@ class settings():
             settings = json.load(s)[profile]
         self.discord = discord_settings(settings)
         self.spreadsheet = spreadsheet_settings(settings)
+        print("Using profile " + profile)
+        print(self.discord)
+        print(self.spreadsheet)

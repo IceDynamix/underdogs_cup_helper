@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from gsheet import spreadsheet
-from settings import settings
+from settings_manager import settings_manager
 
 
 @dataclass
@@ -37,7 +37,7 @@ class player():
 
 
 class player_list():
-    def __init__(self, settings: settings):
+    def __init__(self, settings: settings_manager):
         self.settings = settings
         self.spreadsheet = spreadsheet(settings)
         self.read_spreadsheet()
@@ -91,7 +91,7 @@ class player_list():
 
 
 if __name__ == "__main__":
-    p = player_list(settings("debug"))
+    p = player_list(settings_manager("debug"))
     print(p.player_list[0].to_row())
     p.remove(126806732889522000)
     p.update_spreadsheet()
