@@ -1,5 +1,6 @@
-from datetime import datetime
 from dataclasses import dataclass
+from datetime import datetime
+
 from gsheet import spreadsheet
 
 
@@ -51,10 +52,7 @@ class player_list():
         )
 
     def add(self, discord_id: int,
-            discord_tag: str, username: str) -> bool:
-
-        if self.is_registered(discord_id, username):
-            raise Exception("Player already registered")
+            discord_tag: str, username: str):
         timestamp = datetime.utcnow().strftime(self.date_format)
         self.player_list.append(
             player(timestamp, discord_id, discord_tag, username.lower())
@@ -62,10 +60,16 @@ class player_list():
 
         return True
 
-    def is_registered(self, discord_id: int, username: str) -> bool:
+    def is_discord_registered(self, discord_id: int) -> bool:
         return len([
             p for p in self.player_list
-            if p.discord_id == discord_id and p.username.lower() == username
+            if p.discord_id == discord_id
+        ]) > 0
+
+    def is_username_registered(self, username: str):
+        return len([
+            p for p in self.player_list
+            if p.username.lower() == username
         ]) > 0
 
     def remove(self, discord_id: int) -> None:
