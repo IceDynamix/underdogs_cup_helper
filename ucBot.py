@@ -5,19 +5,17 @@ from discord.ext import commands
 
 import discord_commands.owner
 import discord_commands.tournament
-from player_list import player_list
 from settings_manager import settings
 from tetrio import tetrio_user
 
 profile = sys.argv[1] if len(sys.argv) > 1 else "debug"
 settings = settings.from_profile(profile)
 ucBot = commands.Bot(command_prefix="!")
-player_list = player_list(settings, ucBot)
 
 ucBot.add_cog(discord_commands.owner.owner(
     bot=ucBot, settings=settings))
 ucBot.add_cog(discord_commands.tournament.tournament(
-    bot=ucBot, settings=settings, players=player_list))
+    bot=ucBot, settings=settings))
 
 
 @ucBot.check

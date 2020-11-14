@@ -1,15 +1,39 @@
-from discord.ext import commands
+from datetime import datetime
+from time import time
+
+from discord.ext import commands, tasks
 from player_list import player_list
 from settings_manager import settings
-from tetrio import tetrio_user
+from tetrio import retrieve_data, tetrio_user
 
 
 class tournament(commands.Cog):
-    def __init__(self, bot: commands.Bot,
-                 settings: settings, players: player_list):
+    def __init__(self, bot: commands.Bot, settings: settings):
         self.bot = bot
         self.settings = settings
-        self.player_list = players
+        self.update_stats.start()
+
+    @tasks.loop(hours=6)
+    async def update_stats(self):
+        print(f"Updating stats ({datetime.utcnow()})")
+        start = time()
+        date = retrieve_data("players", False)["date"]
+        print("Updated players")
+        retrieve_data("player_history", False)
+        self.player_list = player_list(settings=self.settings, bot=self.bot)
+        end = time()
+        print("Updated stats, " +
+              "took {:.2f} seconds, ".format(end - start) +
+              "last data from {}".format(date))
+
+    @update_stats.before_loop
+    async def before_update_stats(self):
+        await self.bot.wait_until_ready()
+
+    @update_stats.after_loop
+    async def on_update_cancel(self):
+        if self.update_stats.is_being_cancelled():
+            print(f"Could not update stats ({datetime.utcnow()})")
 
     @commands.command(help="Registers you to the ongoing tournament")
     async def register(self, ctx: commands.Context, username: str = None):
@@ -67,3 +91,11 @@ class tournament(commands.Cog):
             await ctx.send(msg)
         else:
             await ctx.send("No players")
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def update(self, ctx: commands.Context):
+        if self.update_stats.is_running():
+            await ctx.send("Already updating")
+        else:
+            self.update_stats.start()

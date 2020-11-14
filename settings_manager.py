@@ -13,19 +13,20 @@ class settings():
     spreadsheet_registration_range: str
 
     @classmethod
-    def from_profile(cls, profile: str):
+    def from_profile(cls, profile_name: str):
         with open(cls.path, 'r') as s:
-            settings = json.load(s)[profile]
+            profiles = json.load(s)
 
-        settings = settings(
-            discord_channel=settings["discord_channel"],
-            discord_participant_role=settings["discord_participant_role"],
-            discord_staff_role=settings["discord_staff_role"],
-            spreadsheet_id=settings["spreadsheet_id"],
-            spreadsheet_registration_range=settings["spreadsheet_registration_range"]
+        profile = profiles[profile_name]
+        new_settings = settings(
+            discord_channel=profile["discord_channel"],
+            discord_participant_role=profile["discord_participant_role"],
+            discord_staff_role=profile["discord_staff_role"],
+            spreadsheet_id=profile["spreadsheet_id"],
+            spreadsheet_registration_range=profile["spreadsheet_registration_range"]
         )
 
-        print("Using profile " + profile)
-        print(settings)
+        print("Using profile " + profile_name)
+        print(new_settings)
 
-        return settings
+        return new_settings
