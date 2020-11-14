@@ -7,6 +7,7 @@ import requests
 
 TETRIO_CACHE = "tetrio_cache"
 RANKS = {
+    "z": {"color": "828282", "proper": "Unranked"},
     "d": {"color": "856C84", "proper": "D"},
     "dp": {"color": "815880", "proper": "D+"},
     "cm": {"color": "6C417C", "proper": "C-"},
@@ -24,7 +25,6 @@ RANKS = {
     "ss": {"color": "e39d3b", "proper": "SS"},
     "u": {"color": "c75c2e", "proper": "U"},
     "x": {"color": "b852bf", "proper": "X"},
-    "z": {"color": "828282", "proper": "Unranked"},
 }
 
 
@@ -61,9 +61,10 @@ class tetrio_user_data():
     games_played: int
     games_won: int
     games_lost: int
+    highest_rank: str
 
     @staticmethod
-    def from_username(username: str, playerbase_data):
+    def from_username(username: str, playerbase_data, player_history_data):
         username = username.lower()
         latest_stats = playerbase_data["latest_stats"]
         unranked_stats = playerbase_data["unranked_stats"]
@@ -74,6 +75,14 @@ class tetrio_user_data():
             player_data = unranked_stats[username]
         else:
             return None
+
+        rank_history = player_history_data["ranks"][username]["rank"]
+        largestIndex = max([
+            [RANKS[r]["proper"].lower() for r in RANKS].index(rank)
+            for rank in rank_history
+        ])
+
+        highest_rank = list(RANKS.keys())[largestIndex]
 
         return tetrio_user_data(
             username=username,
@@ -86,7 +95,8 @@ class tetrio_user_data():
             vs=player_data["VS"],
             games_played=player_data["GP"],
             games_won=player_data["GW"],
-            games_lost=player_data["GL"]
+            games_lost=player_data["GL"],
+            highest_rank=highest_rank
         )
 
     def generate_embed(self):
@@ -116,6 +126,16 @@ class tetrio_user_data():
 
         return embed
 
+    def to_row(self):
+        return [
+            self.tetra_rating,
+            self.rank,
+            self.apm,
+            self.pps,
+            self.vs,
+            self.highest_rank
+        ]
+
 
 @dataclass
 class tetrio_user():
@@ -124,8 +144,12 @@ class tetrio_user():
     announcement_stats: tetrio_user_data
 
     current_playerbase_data = retrieve_data("players")
+    current_player_history_data = retrieve_data("player_history")
+
     announcement_playerbase_data = retrieve_data(
         "players", True, "announcement")
+    announcement_player_history_data = retrieve_data(
+        "player_history", True, "announcement_history")
 
     @staticmethod
     def from_username(username: str):
@@ -133,11 +157,18 @@ class tetrio_user():
         return tetrio_user(
             username=username,
             current_stats=tetrio_user_data.from_username(
-                username, tetrio_user.current_playerbase_data),
+                username, tetrio_user.current_playerbase_data,
+                tetrio_user.current_player_history_data),
             announcement_stats=tetrio_user_data.from_username(
-                username, tetrio_user.announcement_playerbase_data),
+                username, tetrio_user.announcement_playerbase_data,
+                tetrio_user.announcement_player_history_data),
         )
+
+    def to_row(self):
+        return [self.username] + self.current_stats.to_row() + \
+            self.announcement_stats.to_row()
 
 
 if __name__ == "__main__":
     retrieve_data("players", False, "announcement")
+    retrieve_data("player_history", False, "announcement_history")

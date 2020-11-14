@@ -20,8 +20,8 @@ class player():
     @staticmethod
     def from_row(row: list, bot: commands.Bot):
         discord_id = int(row[1])
-        username = row[2]
-        discord_tag = row[3]
+        discord_tag = row[2]
+        username = row[3]
 
         return player(
             reg_timestamp=datetime.strptime(row[0], player.date_format),
@@ -39,19 +39,8 @@ class player():
             timestamp,
             # gsheets will reduce the number to e notation if passed as int
             str(self.discord_id),
-            self.tetrio.current_stats.username,
             self.discord_tag,
-            self.tetrio.current_stats.tetra_rating,
-            self.tetrio.current_stats.rank,
-            self.tetrio.current_stats.apm,
-            self.tetrio.current_stats.pps,
-            self.tetrio.current_stats.vs,
-            self.tetrio.announcement_stats.tetra_rating,
-            self.tetrio.announcement_stats.rank,
-            self.tetrio.announcement_stats.apm,
-            self.tetrio.announcement_stats.pps,
-            self.tetrio.announcement_stats.vs
-        ]
+        ] + self.tetrio.to_row()
 
     def __str__(self) -> str:
         return f"{self.discord_tag}: {self.tetrio.username}"
