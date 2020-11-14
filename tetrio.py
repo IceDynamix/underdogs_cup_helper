@@ -140,10 +140,14 @@ class tetrio_user_data():
         )
 
     def generate_embed(self):
+        timestamp = datetime.strptime(
+            current_playerbase_data["date"],
+            "%Y-%m-%d %H:%M:%S UTC")
         embed = discord.Embed(
             title=self.username,
             color=int(RANKS[self.rank]["color"], 16),
-            url="https://ch.tetr.io/u/"+self.username
+            url="https://ch.tetr.io/u/"+self.username,
+            timestamp=timestamp
         )
 
         embed.set_thumbnail(
