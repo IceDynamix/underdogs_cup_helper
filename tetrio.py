@@ -1,11 +1,13 @@
 import json
 import os
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 
 import discord
 import requests
 
 TETRIO_CACHE = "tetrio_cache"
+LAST_UPDATE = "last_update.json"
 RANKS = {
     "z": {"value": -1, "color": "828282", "proper": "Unranked"},
     "d": {"value": 0, "color": "856C84", "proper": "D"},
@@ -29,6 +31,11 @@ RANKS = {
 
 
 def retrieve_data(endpoint: str, use_cache: bool = True, name: str = None):
+    print(f"Retrieving data from endpoint {endpoint} with name {name}")
+
+    def debug(s: str):
+        print("    " + s)
+
     if not os.path.exists(TETRIO_CACHE):
         os.mkdir(TETRIO_CACHE)
 
@@ -37,15 +44,47 @@ def retrieve_data(endpoint: str, use_cache: bool = True, name: str = None):
     else:
         cache_path = f"./{TETRIO_CACHE}/{endpoint}.json"
 
-    if use_cache and os.path.exists(cache_path):
-        with open(cache_path, "r") as f:
-            return json.load(f)
+    last_update_path = f"./{TETRIO_CACHE}/{LAST_UPDATE}"
+    if not os.path.exists(last_update_path):
+        last_updates = {}
     else:
+        with open(last_update_path, "r") as u:
+            last_updates = json.load(u)
+
+    if endpoint in last_updates:
+        last_update = datetime.fromisoformat(last_updates[endpoint])
+        force_refresh = datetime.utcnow() - last_update > timedelta(hours=3)
+        debug("Last update: {}, {} ago".format(
+            last_updates[endpoint], datetime.utcnow() - last_update))
+    else:
+        debug("Last update: None")
+        force_refresh = True
+
+    if use_cache and os.path.exists(cache_path) and not force_refresh:
+        debug("Taking from cache")
+        with open(cache_path, "r") as f:
+            data = json.load(f)
+    else:
+        debug("Downloading")
         data = json.loads(requests.get(
             f"https://tetrio.team2xh.net/data/{endpoint}.js").text)
         with open(cache_path, "w+") as f:
             json.dump(data, f)
-        return data
+        with open(last_update_path, "w") as u:
+            last_updates[endpoint] = datetime.utcnow().isoformat()
+            json.dump(last_updates, u)
+
+    debug("Done")
+    return data
+
+
+current_playerbase_data = retrieve_data("players")
+current_player_history_data = retrieve_data("player_history")
+
+announcement_playerbase_data = retrieve_data(
+    "players", True, "announcement")
+announcement_player_history_data = retrieve_data(
+    "player_history", True, "announcement_history")
 
 
 @dataclass
@@ -143,30 +182,56 @@ class tetrio_user():
     current_stats: tetrio_user_data
     announcement_stats: tetrio_user_data
 
-    current_playerbase_data = retrieve_data("players")
-    current_player_history_data = retrieve_data("player_history")
-
-    announcement_playerbase_data = retrieve_data(
-        "players", True, "announcement")
-    announcement_player_history_data = retrieve_data(
-        "player_history", True, "announcement_history")
-
     @staticmethod
     def from_username(username: str):
         username = username.lower()
         return tetrio_user(
             username=username,
             current_stats=tetrio_user_data.from_username(
-                username, tetrio_user.current_playerbase_data,
-                tetrio_user.current_player_history_data),
+                username, current_playerbase_data,
+                current_player_history_data),
             announcement_stats=tetrio_user_data.from_username(
-                username, tetrio_user.announcement_playerbase_data,
-                tetrio_user.announcement_player_history_data),
+                username, announcement_playerbase_data,
+                announcement_player_history_data),
         )
 
     def to_row(self) -> list:
         return [self.username] + self.current_stats.to_row() + \
             self.announcement_stats.to_row()
+
+    def can_participate(self, settings, format_pretty: bool = False):
+        def rank_value(rank: str) -> int:
+            return RANKS[rank]["value"]
+
+        current_rank = self.current_stats.rank
+        announcement_rank = self.announcement_stats.rank
+        highest_rank = self.current_stats.highest_rank
+        message = ""
+
+        if announcement_rank == "z":
+            message = "Unranked on announcement day"
+        elif rank_value(announcement_rank) > rank_value(settings.rank_cap):
+            message = "Rank on announcement day too high ({})".format(
+                RANKS[announcement_rank]["proper"]
+            )
+        elif rank_value(current_rank) > rank_value(settings.rank_cap) + 1:
+            message = "Current rank too high ({})".format(
+                RANKS[current_rank]["proper"]
+            )
+        elif rank_value(highest_rank) > rank_value(settings.rank_cap) + 1:
+            message = "Highest-ever rank too high ({})".format(
+                RANKS[highest_rank]["proper"]
+            )
+
+        if message:
+            if format_pretty:
+                message = ":red_square: You are not allowed to participate. " +\
+                    "Reason: " + message
+            return (False, message)
+        else:
+            if format_pretty:
+                message = ":green_square: You are allowed to participate!"
+            return (True, message)
 
 
 if __name__ == "__main__":

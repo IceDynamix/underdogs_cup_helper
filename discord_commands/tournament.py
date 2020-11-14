@@ -1,30 +1,29 @@
 from datetime import datetime
-from time import time
 
 from discord.ext import commands, tasks
 from player_list import player_list
 from settings_manager import settings
 from tetrio import retrieve_data, tetrio_user
+import tetrio
 
 
 class tournament(commands.Cog):
     def __init__(self, bot: commands.Bot, settings: settings):
         self.bot = bot
         self.settings = settings
+        self.initial_update = False
+        self.player_list = player_list(settings=self.settings, bot=self.bot)
         self.update_stats.start()
 
     @tasks.loop(hours=6)
     async def update_stats(self):
-        print(f"Updating stats ({datetime.utcnow()})")
-        start = time()
-        date = retrieve_data("players", False)["date"]
-        print("Updated players")
-        retrieve_data("player_history", False)
+        if not self.initial_update:  # Don't run the first time
+            self.initial_update = True
+            return
+        tetrio.current_playerbase_data = retrieve_data("players")
+        tetrio.current_player_history_data = retrieve_data(
+            "player_history")
         self.player_list = player_list(settings=self.settings, bot=self.bot)
-        end = time()
-        print("Updated stats, " +
-              "took {:.2f} seconds, ".format(end - start) +
-              "last data from {}".format(date))
 
     @update_stats.before_loop
     async def before_update_stats(self):
@@ -53,10 +52,16 @@ class tournament(commands.Cog):
 
         player_data = tetrio_user.from_username(username)
 
-        if player_data:
+        if player_data.current_stats:
             await ctx.send(embed=player_data.current_stats.generate_embed())
         else:
-            await ctx.send("Username not found")
+            await ctx.send(f"Could not find user with username {username}")
+            return
+
+        can_participate, message = player_data.can_participate(
+            self.settings, True)
+        if not can_participate:
+            await ctx.send(message)
             return
 
         # it's going to fail if you edit the owner
@@ -83,6 +88,24 @@ class tournament(commands.Cog):
         self.player_list.update_spreadsheet()
         await ctx.author.remove_roles(role)
         await ctx.send(f"Unregistered Discord user {ctx.author}")
+
+    @commands.command(
+        name="caniparticipate",
+        help="Unsure about whether you can participate?",
+    )
+    async def can_i_participate(self, ctx: commands.Context,
+                                username: str = None) -> bool:
+        if not username:
+            username = ctx.author.display_name
+        username = username.lower()
+
+        user = tetrio_user.from_username(username)
+        if not user:
+            ctx.send(f"Could not find user with username {username}")
+
+        response = tetrio_user.from_username(
+            username).can_participate(self.settings, True)
+        await ctx.send(response)
 
     @commands.command(hidden=True)
     async def player_list(self, ctx: commands.Context):
