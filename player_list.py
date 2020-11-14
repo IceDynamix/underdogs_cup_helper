@@ -39,13 +39,18 @@ class player():
             timestamp,
             # gsheets will reduce the number to e notation if passed as int
             str(self.discord_id),
-            self.tetrio.username,
+            self.tetrio.current_stats.username,
             self.discord_tag,
-            self.tetrio.tetra_rating,
-            self.tetrio.rank,
-            self.tetrio.apm,
-            self.tetrio.pps,
-            self.tetrio.vs
+            self.tetrio.current_stats.tetra_rating,
+            self.tetrio.current_stats.rank,
+            self.tetrio.current_stats.apm,
+            self.tetrio.current_stats.pps,
+            self.tetrio.current_stats.vs,
+            self.tetrio.announcement_stats.tetra_rating,
+            self.tetrio.announcement_stats.rank,
+            self.tetrio.announcement_stats.apm,
+            self.tetrio.announcement_stats.pps,
+            self.tetrio.announcement_stats.vs
         ]
 
     def __str__(self) -> str:
@@ -64,7 +69,7 @@ class player_list():
             self.settings.spreadsheet.registration_range)
         self.player_list = [
             player.from_row(row, self.bot)
-            for row in rows if len(row) == 4
+            for row in rows if len(row) == 14
         ]
 
     def update_spreadsheet(self):
@@ -108,8 +113,3 @@ class player_list():
 
     def __str__(self) -> str:
         return "\n".join([str(p) for p in self.player_list])
-
-
-if __name__ == "__main__":
-    p = player_list(settings_manager("debug"))
-    print(p.player_list[0].to_row())
