@@ -8,11 +8,10 @@ import tetrio
 
 
 class tournament(commands.Cog):
-    def __init__(self, bot: commands.Bot, settings: settings):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.settings = settings
         self.initial_update = False
-        self.player_list = player_list(settings=self.settings, bot=self.bot)
+        self.player_list = player_list(bot=self.bot)
         self.update_stats.start()
 
     @tasks.loop(hours=6)
@@ -23,7 +22,7 @@ class tournament(commands.Cog):
         tetrio.current_playerbase_data = retrieve_data("players")
         tetrio.current_player_history_data = retrieve_data(
             "player_history")
-        self.player_list = player_list(settings=self.settings, bot=self.bot)
+        self.player_list = player_list(bot=self.bot)
 
     @update_stats.before_loop
     async def before_update_stats(self):
@@ -36,7 +35,7 @@ class tournament(commands.Cog):
 
     @commands.command(help="Registers you to the ongoing tournament")
     async def register(self, ctx: commands.Context, username: str = None):
-        role = ctx.guild.get_role(self.settings.discord_participant_role)
+        role = ctx.guild.get_role(settings.discord_participant_role)
 
         if not username:
             username = ctx.author.display_name
@@ -58,8 +57,7 @@ class tournament(commands.Cog):
             await ctx.send(f"Could not find user with username {username}")
             return
 
-        can_participate, message = player_data.can_participate(
-            self.settings, True)
+        can_participate, message = player_data.can_participate(True)
         if not can_participate:
             await ctx.send(message)
             return
@@ -82,7 +80,7 @@ class tournament(commands.Cog):
     async def unregister(self, ctx: commands.Context, discord_id: str = None):
 
         # staff is removing the player
-        staff_role = ctx.guild.get_role(self.settings.discord_staff_role)
+        staff_role = ctx.guild.get_role(settings.discord_staff_role)
         if staff_role in ctx.author.roles and discord_id:
             discord_id = int(discord_id)
             player_to_remove = await ctx.guild.fetch_member(discord_id)
@@ -93,7 +91,7 @@ class tournament(commands.Cog):
             player_to_remove = ctx.author
 
         participant_role = ctx.guild.get_role(
-            self.settings.discord_participant_role)
+            settings.discord_participant_role)
         if participant_role not in player_to_remove.roles:
             await ctx.send("Not registered")
             return
@@ -117,7 +115,7 @@ class tournament(commands.Cog):
         if not user:
             ctx.send(f"Could not find user with username {username}")
         _, message = tetrio_user.from_username(
-            username).can_participate(self.settings, True)
+            username).can_participate(True)
         await ctx.send(message)
 
     @commands.command(hidden=True)
@@ -135,3 +133,7 @@ class tournament(commands.Cog):
             await ctx.send("Already updating")
         else:
             self.update_stats.start()
+
+
+def setup(bot: commands.Bot):
+    bot.add_cog(tournament(bot))

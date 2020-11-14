@@ -2,17 +2,15 @@ from __future__ import print_function
 
 import os.path
 import pickle
+from settings_manager import settings
 
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
-from settings_manager import settings
-
 
 class spreadsheet:
-    def __init__(self, settings: settings):
-        self.settings = settings
+    def __init__(self):
         self.service = build(
             "sheets", "v4", credentials=self.__credentials()
         ).spreadsheets()
@@ -38,7 +36,7 @@ class spreadsheet:
 
     def read_range(self, a1notation: str) -> list:
         result = self.service.values().get(
-            spreadsheetId=self.settings.spreadsheet_id,
+            spreadsheetId=settings.spreadsheet_id,
             range=a1notation
         ).execute()
 
@@ -46,7 +44,7 @@ class spreadsheet:
 
     def write_range(self, a1notation: str, values: list) -> None:
         self.service.values().update(
-            spreadsheetId=self.settings.spreadsheet_id,
+            spreadsheetId=settings.spreadsheet_id,
             range=a1notation,
             valueInputOption="USER_ENTERED",
             body={"values": values}
@@ -54,6 +52,6 @@ class spreadsheet:
 
     def clear_range(self, a1notation) -> None:
         self.service.values().clear(
-            spreadsheetId=self.settings.spreadsheet_id,
+            spreadsheetId=settings.spreadsheet_id,
             range=a1notation
         ).execute()

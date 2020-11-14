@@ -3,19 +3,16 @@ import sys
 import discord
 from discord.ext import commands
 
-import discord_commands.owner
-import discord_commands.tournament
 from settings_manager import settings
 from tetrio import tetrio_user
 
 profile = sys.argv[1] if len(sys.argv) > 1 else "debug"
-settings = settings.from_profile(profile)
 ucBot = commands.Bot(command_prefix="!")
 
-ucBot.add_cog(discord_commands.owner.owner(
-    bot=ucBot, settings=settings))
-ucBot.add_cog(discord_commands.tournament.tournament(
-    bot=ucBot, settings=settings))
+extensions = [
+    "cogs.owner",
+    "cogs.tournament"
+]
 
 
 @ucBot.check
@@ -57,6 +54,9 @@ async def stats(ctx: commands.Context, username: str = None):
 
 
 if __name__ == "__main__":
+    for extension in extensions:
+        ucBot.load_extension(extension)
+
     with open("./credentials/token.secret") as tokenFile:
         token = tokenFile.read()
     ucBot.run(token)

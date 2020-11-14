@@ -1,9 +1,10 @@
 import json
 from dataclasses import dataclass
+import sys
 
 
 @dataclass
-class settings():
+class settings_manager():
     path = "settings.json"
 
     discord_channel: int
@@ -19,7 +20,7 @@ class settings():
             profiles = json.load(s)
 
         profile = profiles[profile_name]
-        new_settings = settings(
+        new_settings = settings_manager(
             discord_channel=profile["discord_channel"],
             discord_participant_role=profile["discord_participant_role"],
             discord_staff_role=profile["discord_staff_role"],
@@ -32,3 +33,7 @@ class settings():
         print(new_settings)
 
         return new_settings
+
+
+settings = settings_manager.from_profile(
+    sys.argv[1] if len(sys.argv) > 1 else "debug")

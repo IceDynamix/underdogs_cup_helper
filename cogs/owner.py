@@ -2,15 +2,13 @@ from time import time
 
 import discord
 import tetrio
-from discord.ext import commands
 from settings_manager import settings
+from discord.ext import commands
 
 
 class owner(commands.Cog):
-
-    def __init__(self, bot: commands.Bot, settings: settings):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.settings = settings
 
     async def cog_check(self, ctx: commands.Context):
         return commands.is_owner()
@@ -49,3 +47,23 @@ class owner(commands.Cog):
         check_in_message = await ctx.send(embed=embed)
         await check_in_message.add_reaction("✅")
         print(f"Created check-in message <{check_in_message.id}>")
+
+    @commands.command(name="load", hidden=True)
+    async def load_cog(self, ctx, cog: str):
+        self.bot.load_extension(cog)
+        await ctx.send("Loaded cog successfully")
+
+    @commands.command(name="unload", hidden=True)
+    async def unload_cog(self, ctx, cog: str):
+        self.bot.unload_extension(cog)
+        await ctx.send("Unloaded cog successfully")
+
+    @commands.command(name="reload", hidden=True)
+    async def reload_cog(self, ctx, cog: str):
+        self.bot.unload_extension(cog)
+        self.bot.load_extension(cog)
+        await ctx.send("Reloaded cog successfully")
+
+
+def setup(bot: commands.Bot):
+    bot.add_cog(owner(bot))

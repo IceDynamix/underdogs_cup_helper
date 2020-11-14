@@ -2,6 +2,7 @@ import json
 import os
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from settings_manager import settings
 
 import discord
 import requests
@@ -199,7 +200,7 @@ class tetrio_user():
         return [self.username] + self.current_stats.to_row() + \
             self.announcement_stats.to_row()
 
-    def can_participate(self, settings, format_pretty: bool = False):
+    def can_participate(self, format_pretty: bool = False):
         def rank_value(rank: str) -> int:
             return RANKS[rank]["value"]
 
