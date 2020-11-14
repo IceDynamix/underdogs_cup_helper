@@ -2,21 +2,23 @@
     "debug": {
         "discord": {
             "channel": 477999746070347787,
-            "role": 228485722284228608
+            "participant_role": 228485722284228608,
+            "staff_role": 228406508574998529
         },
         "spreadsheet": {
             "spreadsheet_id": "12ofvIJ0BI80Qz_GgU35nPlbsm4MVuOzxIx1D8l5iCnM",
-            "registration_range": "regs!A2:D"
+            "registration_range": "regs!A2:I"
         }
     },
     "uc5_debug": {
         "discord": {
             "channel": 776806403884056616,
-            "role": 767311774629625876
+            "participant_role": 767311774629625876,
+            "staff_role": 718603985874845737
         },
         "spreadsheet": {
             "spreadsheet_id": "12ofvIJ0BI80Qz_GgU35nPlbsm4MVuOzxIx1D8l5iCnM",
-            "registration_range": "regs!A2:D"
+            "registration_range": "regs!A2:I"
         }
     }
 }

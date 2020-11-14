@@ -1,25 +1,24 @@
 from discord.ext import commands
 from settings_manager import settings_manager
 import tetrio
-from player_list import player_list
+from player_list import player_list, player
+from tetrio import tetrio_user
 
 
 class tournament(commands.Cog):
     def __init__(self, bot: commands.Bot,
-                 settings: settings_manager, player_list: player_list):
+                 settings: settings_manager, players: player_list):
         self.bot = bot
         self.settings = settings
-        self.player_list = player_list
+        self.player_list = players
 
     @commands.command(help="Registers you to the ongoing tournament")
     async def register(self, ctx: commands.Context, username: str = None):
-        role = ctx.guild.get_role(self.settings.discord.role)
+        role = ctx.guild.get_role(self.settings.discord.participant_role)
 
         if not username:
             username = ctx.author.display_name
         username = username.lower()
-
-        print(ctx.author.id)
 
         if role in ctx.author.roles or \
                 self.player_list.is_discord_registered(ctx.author.id):
@@ -29,46 +28,29 @@ class tournament(commands.Cog):
             await ctx.send("Tetr.io username already registered")
             return
 
-        playerbase_data = tetrio.retrieve_data("players")
+        player_data = tetrio_user.from_username(username)
 
-        # check if valid
-
-        if username not in playerbase_data["latest_stats"]:
-            if username in playerbase_data["unranked_stats"]:
-                await ctx.send(
-                    f"Player {username} was unranked on announcement date, " +
-                    "which makes you ineligible to participate"
-                )
-                return
-            await ctx.send(
-                f"Username {username} not found, " +
-                "please provide a valid username with `!register <username>`"
-            )
+        if player_data:
+            await ctx.send(embed=player_data.generate_embed())
+        else:
+            await ctx.send("Username not found")
             return
-
-        user_data = playerbase_data["latest_stats"][username]
-
-        await ctx.send(
-            f"User {username} found, rank: {user_data['rank'].upper()}"
-        )
 
         # it's going to fail if you edit the owner
         if ctx.author.display_name != username and not commands.is_owner():
             await ctx.author.edit(nick=username)
 
-        self.player_list.add(ctx.author.id, ctx.author.name, username)
+        self.player_list.add(ctx.author.id, str(ctx.author), player_data)
         self.player_list.update_spreadsheet()
 
         await ctx.author.add_roles(role)
         await ctx.send(
-            "Registered Discord user " +
-            f"{ctx.author.name}#{ctx.author.discriminator} " +
-            f"as player {username}"
+            f"Registered Discord user {ctx.author} as player {username}"
         )
 
     @commands.command(help="Unregister from the tournament if necessary")
     async def unregister(self, ctx: commands.Context):
-        role = ctx.guild.get_role(self.settings.discord.role)
+        role = ctx.guild.get_role(self.settings.discord.participant_role)
 
         if role not in ctx.author.roles:
             await ctx.send("Not registered")
@@ -77,7 +59,12 @@ class tournament(commands.Cog):
         self.player_list.remove(ctx.author.id)
         self.player_list.update_spreadsheet()
         await ctx.author.remove_roles(role)
-        await ctx.send(
-            "Unregistered Discord user " +
-            f"{ctx.author.name}#{ctx.author.discriminator}"
-        )
+        await ctx.send(f"Unregistered Discord user {ctx.author}")
+
+    @commands.command(hidden=True)
+    async def player_list(self, ctx: commands.Context):
+        msg = str(self.player_list)
+        if msg:
+            await ctx.send(msg)
+        else:
+            await ctx.send("No players")

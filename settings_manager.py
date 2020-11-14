@@ -5,11 +5,13 @@ from dataclasses import dataclass
 @dataclass
 class discord_settings():
     channel: int
-    role: int
+    participant_role: int
+    staff_role: int
 
     def __init__(self, settings: dict):
         self.channel = settings["discord"]["channel"]
-        self.role = settings["discord"]["role"]
+        self.participant_role = settings["discord"]["participant_role"]
+        self.staff_role = settings["discord"]["staff_role"]
 
 
 @dataclass

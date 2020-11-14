@@ -1,5 +1,9 @@
 from dataclasses import dataclass
 from datetime import datetime
+from tetrio import tetrio_user
+
+import discord
+from discord.ext import commands
 
 from gsheet import spreadsheet
 from settings_manager import settings_manager
@@ -9,18 +13,22 @@ from settings_manager import settings_manager
 class player():
     date_format = "%Y-%m-%d %H:%M"
 
+    reg_timestamp: datetime
     discord_id: int
     discord_tag: str
-    username: str
-    reg_timestamp: datetime = datetime.utcnow()
+    tetrio: tetrio_user
 
-    @classmethod
-    def from_row(self, row: list):
+    @staticmethod
+    def from_row(row: list, bot: commands.Bot):
+        discord_id = int(row[1])
+        username = row[2]
+        discord_tag = row[3]
+
         return player(
-            reg_timestamp=datetime.strptime(row[0], self.date_format),
-            discord_id=int(row[1]),
-            discord_tag=row[2],
-            username=row[3]
+            reg_timestamp=datetime.strptime(row[0], player.date_format),
+            discord_id=discord_id,
+            discord_tag=discord_tag,
+            tetrio=tetrio_user.from_username(username)
         )
 
     def to_row(self):
@@ -30,42 +38,52 @@ class player():
             timestamp = self.reg_timestamp
         return [
             timestamp,
-            self.discord_id,
+            # gsheets will reduce the number to e notation if passed as int
+            str(self.discord_id),
+            self.tetrio.username,
             self.discord_tag,
-            self.username
+            self.tetrio.tetra_rating,
+            self.tetrio.rank,
+            self.tetrio.apm,
+            self.tetrio.pps,
+            self.tetrio.vs
         ]
+
+    def __str__(self) -> str:
+        return f"{self.discord_tag}: {self.tetrio.username}"
 
 
 class player_list():
-    def __init__(self, settings: settings_manager):
+    def __init__(self, settings: settings_manager, bot: commands.Bot):
         self.settings = settings
         self.spreadsheet = spreadsheet(settings)
+        self.bot = bot
         self.read_spreadsheet()
 
     def read_spreadsheet(self):
         rows = self.spreadsheet.read_range(
             self.settings.spreadsheet.registration_range)
         self.player_list = [
-            player.from_row(row) for row in rows if len(row) == 4
+            player.from_row(row, self.bot)
+            for row in rows if len(row) == 4
         ]
 
     def update_spreadsheet(self):
-        self.spreadsheet.clear_range(
-            self.settings.spreadsheet.registration_range)
-        self.spreadsheet.write_range(
-            self.settings.spreadsheet.registration_range,
-            [p.to_row() for p in self.player_list]
-        )
+        reg_range = self.settings.spreadsheet.registration_range
+        # only clear once data has been processed, otherwise it might
+        # wipe all registrations
+        data = [p.to_row() for p in self.player_list]
+        self.spreadsheet.clear_range(reg_range)
+        self.spreadsheet.write_range(reg_range, data)
 
-    def add(self, discord_id: int,
-            discord_tag: str, username: str):
+    def add(self, discord_id: int, discord_tag: str, tetrio: tetrio_user):
         timestamp = datetime.utcnow().strftime(player.date_format)
         self.player_list.append(
             player(
                 reg_timestamp=timestamp,
                 discord_id=discord_id,
                 discord_tag=discord_tag,
-                username=username.lower()
+                tetrio=tetrio
             )
         )
 
@@ -80,7 +98,7 @@ class player_list():
     def is_username_registered(self, username: str):
         return len([
             p for p in self.player_list
-            if p.username.lower() == username
+            if p.tetrio.username == username.lower()
         ]) > 0
 
     def remove(self, discord_id: int) -> None:
@@ -89,9 +107,10 @@ class player_list():
             if p.discord_id != discord_id
         ]
 
+    def __str__(self) -> str:
+        return "\n".join([str(p) for p in self.player_list])
+
 
 if __name__ == "__main__":
     p = player_list(settings_manager("debug"))
     print(p.player_list[0].to_row())
-    p.remove(126806732889522000)
-    p.update_spreadsheet()

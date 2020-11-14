@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import json
 import os
 import discord
@@ -43,44 +44,72 @@ def retrieve_data(endpoint: str, use_cache: bool = True):
         return data
 
 
-def generate_embed(username: str = None):
+@dataclass
+class tetrio_user():
+    username: str
+    tetra_rating: float
+    rank: str
+    rating_deviation: float
+    glicko: float
+    apm: float
+    pps: float
+    vs: float
+    games_played: int
+    games_won: int
+    games_lost: int
+
     playerbase_data = retrieve_data("players")
 
-    if username in playerbase_data["latest_stats"]:
-        player_data = playerbase_data["latest_stats"][username]
-    elif username in playerbase_data["unranked_stats"]:
-        player_data = playerbase_data["unranked_stats"][username]
-    else:
-        return None
+    @staticmethod
+    def from_username(username: str):
+        username = username.lower()
+        latest_stats = tetrio_user.playerbase_data["latest_stats"]
+        unranked_stats = tetrio_user.playerbase_data["unranked_stats"]
 
-    embed = discord.Embed(
-        title=username,
-        color=int(RANK_COLORS[player_data["rank"]], 16),
-        url="https://ch.tetr.io/u/"+username
-    )
+        if username in latest_stats:
+            player_data = latest_stats[username]
+        elif username in unranked_stats:
+            player_data = unranked_stats[username]
+        else:
+            return None
 
-    embed.set_thumbnail(
-        url="https://tetrio.team2xh.net/images/ranks/{}.png".format(
-            player_data['rank']
+        return tetrio_user(
+            username=username,
+            tetra_rating=player_data["TR"],
+            rank=player_data["rank"],
+            rating_deviation=player_data["RD"],
+            glicko=player_data["glk"],
+            apm=player_data["apm"],
+            pps=player_data["pps"],
+            vs=player_data["VS"],
+            games_played=player_data["GP"],
+            games_won=player_data["GW"],
+            games_lost=player_data["GL"]
         )
-    )
 
-    tr_string = f"{player_data['TR']:.0f}"
+    def generate_embed(self):
+        embed = discord.Embed(
+            title=self.username,
+            color=int(RANK_COLORS[self.rank], 16),
+            url="https://ch.tetr.io/u/"+self.username
+        )
 
-    # tenchi doesn't track unranked player rd
-    if player_data["rank"] != "z":
-        tr_string += f" ± {player_data['RD']}"
+        embed.set_thumbnail(
+            url=f"https://tetrio.team2xh.net/images/ranks/{self.rank}.png"
+        )
 
-    def field(key: str, value: str, inline: bool = True):
-        embed.add_field(name=key, value=value, inline=inline)
+        tr_string = f"{self.tetra_rating:.0f}"
 
-    field("Tetra Rating", tr_string, False)
-    field("APM", player_data["apm"])
-    field("PPS", player_data["pps"])
-    field("VS", player_data["VS"])
+        # tenchi doesn't track unranked player rd
+        if self.rank != "z":
+            tr_string += f" ± {self.rating_deviation}"
 
-    return embed
+        def field(key: str, value: str, inline: bool = True):
+            embed.add_field(name=key, value=value, inline=inline)
 
+        field("Tetra Rating", tr_string, False)
+        field("APM", self.apm)
+        field("PPS", self.pps)
+        field("VS", self.vs)
 
-if __name__ == "__main__":
-    retrieve_data("players")
+        return embed
