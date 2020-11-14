@@ -1,16 +1,18 @@
 {
     "debug": {
-        "discord_channel": 477999746070347787,
-        "discord_participant_role": 228485722284228608,
-        "discord_staff_role": 228406508574998529,
+        "participant_channel": 477999746070347787,
+        "participant_role": 228485722284228608,
+        "staff_channel": 477999746070347787,
+        "staff_role": 228406508574998529,
         "spreadsheet_id": "12ofvIJ0BI80Qz_GgU35nPlbsm4MVuOzxIx1D8l5iCnM",
         "spreadsheet_registration_range": "regs!A3:P",
         "rank_cap": "z"
     },
     "uc5_debug": {
-        "discord_channel": 776806403884056616,
-        "discord_participant_role": 767311774629625876,
-        "discord_staff_role": 718603985874845737,
+        "participant_channel": 777277914106167346,
+        "participant_role": 767311774629625876,
+        "staff_channel": 776806403884056616,
+        "staff_role": 718603985874845737,
         "spreadsheet_id": "12ofvIJ0BI80Qz_GgU35nPlbsm4MVuOzxIx1D8l5iCnM",
         "spreadsheet_registration_range": "regs!A3:P",
         "rank_cap": "z"

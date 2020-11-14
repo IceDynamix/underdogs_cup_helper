@@ -34,11 +34,12 @@ class tournament(commands.Cog):
             print(f"Could not update stats ({datetime.utcnow()})")
 
     async def cog_check(self, ctx: commands.Context):
-        return ctx.channel.id == settings.discord_channel
+        return ctx.channel.id == settings.participant_channel or \
+            ctx.channel.id == settings.staff_channel
 
     @commands.command(help="Registers you to the ongoing tournament")
     async def register(self, ctx: commands.Context, username: str = None):
-        role = ctx.guild.get_role(settings.discord_participant_role)
+        role = ctx.guild.get_role(settings.participant_role)
 
         if not username:
             username = ctx.author.display_name
@@ -84,7 +85,7 @@ class tournament(commands.Cog):
         help="Unregister from the tournament if necessary. Staff can " +
         "unregister players based on a Discord ID.")
     async def unregister(self, ctx: commands.Context, discord_id: str = None):
-        staff_role = ctx.guild.get_role(settings.discord_staff_role)
+        staff_role = ctx.guild.get_role(settings.staff_role)
 
         if discord_id:
             # staff is removing the player
@@ -101,7 +102,7 @@ class tournament(commands.Cog):
             player_to_remove = ctx.author
 
         participant_role = ctx.guild.get_role(
-            settings.discord_participant_role)
+            settings.participant_role)
         if participant_role not in player_to_remove.roles:
             await ctx.send("Not registered")
             return
