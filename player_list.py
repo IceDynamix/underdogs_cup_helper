@@ -4,7 +4,7 @@ from datetime import datetime
 from discord.ext import commands
 
 from gsheet import spreadsheet
-from settings_manager import settings_manager
+from settings_manager import settings
 from tetrio import tetrio_user
 
 
@@ -47,7 +47,7 @@ class player():
 
 
 class player_list():
-    def __init__(self, settings: settings_manager, bot: commands.Bot):
+    def __init__(self, settings: settings, bot: commands.Bot):
         self.settings = settings
         self.spreadsheet = spreadsheet(settings)
         self.bot = bot
@@ -55,14 +55,14 @@ class player_list():
 
     def read_spreadsheet(self):
         rows = self.spreadsheet.read_range(
-            self.settings.spreadsheet.registration_range)
+            self.settings.spreadsheet_registration_range)
         self.player_list = [
             player.from_row(row, self.bot)
             for row in rows if len(row) == 14
         ]
 
     def update_spreadsheet(self):
-        reg_range = self.settings.spreadsheet.registration_range
+        reg_range = self.settings.spreadsheet_registration_range
         # only clear once data has been processed, otherwise it might
         # wipe all registrations
         data = [p.to_row() for p in self.player_list]

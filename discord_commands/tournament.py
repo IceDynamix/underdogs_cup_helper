@@ -1,19 +1,19 @@
 from discord.ext import commands
 from player_list import player_list
-from settings_manager import settings_manager
+from settings_manager import settings
 from tetrio import tetrio_user
 
 
 class tournament(commands.Cog):
     def __init__(self, bot: commands.Bot,
-                 settings: settings_manager, players: player_list):
+                 settings: settings, players: player_list):
         self.bot = bot
         self.settings = settings
         self.player_list = players
 
     @commands.command(help="Registers you to the ongoing tournament")
     async def register(self, ctx: commands.Context, username: str = None):
-        role = ctx.guild.get_role(self.settings.discord.participant_role)
+        role = ctx.guild.get_role(self.settings.discord_participant_role)
 
         if not username:
             username = ctx.author.display_name
@@ -49,7 +49,7 @@ class tournament(commands.Cog):
 
     @commands.command(help="Unregister from the tournament if necessary")
     async def unregister(self, ctx: commands.Context):
-        role = ctx.guild.get_role(self.settings.discord.participant_role)
+        role = ctx.guild.get_role(self.settings.discord_participant_role)
 
         if role not in ctx.author.roles:
             await ctx.send("Not registered")

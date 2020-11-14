@@ -3,12 +3,12 @@ from time import time
 import discord
 import tetrio
 from discord.ext import commands
-from settings_manager import settings_manager
+from settings_manager import settings
 
 
 class owner(commands.Cog):
 
-    def __init__(self, bot: commands.Bot, settings: settings_manager):
+    def __init__(self, bot: commands.Bot, settings: settings):
         self.bot = bot
         self.settings = settings
 
@@ -21,7 +21,7 @@ class owner(commands.Cog):
 
     @commands.command(hidden=True)
     async def toggle(self, ctx: commands.Context):
-        role = ctx.guild.get_role(settings_manager.discord.role)
+        role = ctx.guild.get_role(settings.discord.role)
         if role not in ctx.author.roles:
             await ctx.author.add_roles(role)
             await ctx.send("added role")

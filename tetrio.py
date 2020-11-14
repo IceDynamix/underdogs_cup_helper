@@ -7,24 +7,24 @@ import requests
 
 TETRIO_CACHE = "tetrio_cache"
 RANKS = {
-    "z": {"color": "828282", "proper": "Unranked"},
-    "d": {"color": "856C84", "proper": "D"},
-    "dp": {"color": "815880", "proper": "D+"},
-    "cm": {"color": "6C417C", "proper": "C-"},
-    "c": {"color": "67287B", "proper": "C"},
-    "cp": {"color": "522278", "proper": "C+"},
-    "bm": {"color": "5949BE", "proper": "B-"},
-    "b": {"color": "4357B5", "proper": "B"},
-    "bp": {"color": "4880B2", "proper": "B+"},
-    "am": {"color": "35AA8C", "proper": "A-"},
-    "a": {"color": "3EA750", "proper": "A"},
-    "ap": {"color": "43b536", "proper": "A+"},
-    "sm": {"color": "B79E2B", "proper": "S-"},
-    "s": {"color": "d19e26", "proper": "S"},
-    "sp": {"color": "dbaf37", "proper": "S+"},
-    "ss": {"color": "e39d3b", "proper": "SS"},
-    "u": {"color": "c75c2e", "proper": "U"},
-    "x": {"color": "b852bf", "proper": "X"},
+    "z": {"value": -1, "color": "828282", "proper": "Unranked"},
+    "d": {"value": 0, "color": "856C84", "proper": "D"},
+    "dp": {"value": 1, "color": "815880", "proper": "D+"},
+    "cm": {"value": 2, "color": "6C417C", "proper": "C-"},
+    "c": {"value": 3, "color": "67287B", "proper": "C"},
+    "cp": {"value": 4, "color": "522278", "proper": "C+"},
+    "bm": {"value": 5, "color": "5949BE", "proper": "B-"},
+    "b": {"value": 6, "color": "4357B5", "proper": "B"},
+    "bp": {"value": 7, "color": "4880B2", "proper": "B+"},
+    "am": {"value": 8, "color": "35AA8C", "proper": "A-"},
+    "a": {"value": 9, "color": "3EA750", "proper": "A"},
+    "ap": {"value": 10, "color": "43b536", "proper": "A+"},
+    "sm": {"value": 11, "color": "B79E2B", "proper": "S-"},
+    "s": {"value": 12, "color": "d19e26", "proper": "S"},
+    "sp": {"value": 13, "color": "dbaf37", "proper": "S+"},
+    "ss": {"value": 14, "color": "e39d3b", "proper": "SS"},
+    "u": {"value": 15, "color": "c75c2e", "proper": "U"},
+    "x": {"value": 16, "color": "b852bf", "proper": "X"},
 }
 
 
@@ -164,7 +164,7 @@ class tetrio_user():
                 tetrio_user.announcement_player_history_data),
         )
 
-    def to_row(self):
+    def to_row(self) -> list:
         return [self.username] + self.current_stats.to_row() + \
             self.announcement_stats.to_row()
 

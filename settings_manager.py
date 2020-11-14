@@ -3,35 +3,29 @@ from dataclasses import dataclass
 
 
 @dataclass
-class discord_settings():
-    channel: int
-    participant_role: int
-    staff_role: int
-
-    def __init__(self, settings: dict):
-        self.channel = settings["discord"]["channel"]
-        self.participant_role = settings["discord"]["participant_role"]
-        self.staff_role = settings["discord"]["staff_role"]
-
-
-@dataclass
-class spreadsheet_settings():
-    spreadsheet_id: str
-    registration_range: str
-
-    def __init__(self, settings: dict):
-        self.spreadsheet_id = settings["spreadsheet"]["spreadsheet_id"]
-        self.registration_range = settings["spreadsheet"]["registration_range"]
-
-
-class settings_manager():
+class settings():
     path = "settings.json"
 
-    def __init__(self, profile: str):
-        with open(self.path, 'r') as s:
+    discord_channel: int
+    discord_participant_role: int
+    discord_staff_role: int
+    spreadsheet_id: str
+    spreadsheet_registration_range: str
+
+    @classmethod
+    def from_profile(cls, profile: str):
+        with open(cls.path, 'r') as s:
             settings = json.load(s)[profile]
-        self.discord = discord_settings(settings)
-        self.spreadsheet = spreadsheet_settings(settings)
+
+        settings = settings(
+            discord_channel=settings["discord_channel"],
+            discord_participant_role=settings["discord_participant_role"],
+            discord_staff_role=settings["discord_staff_role"],
+            spreadsheet_id=settings["spreadsheet_id"],
+            spreadsheet_registration_range=settings["spreadsheet_registration_range"]
+        )
+
         print("Using profile " + profile)
-        print(self.discord)
-        print(self.spreadsheet)
+        print(settings)
+
+        return settings
