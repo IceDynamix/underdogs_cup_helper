@@ -2,8 +2,8 @@ from time import time
 
 import discord
 import tetrio
-from settings_manager import settings
 from discord.ext import commands
+from settings_manager import settings
 
 
 class owner(commands.Cog):

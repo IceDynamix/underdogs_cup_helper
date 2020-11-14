@@ -3,8 +3,8 @@ from datetime import datetime
 
 from discord.ext import commands
 
-from settings_manager import settings
 from gsheet import spreadsheet
+from settings_manager import settings
 from tetrio import tetrio_user
 
 

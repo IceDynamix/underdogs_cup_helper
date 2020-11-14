@@ -1,6 +1,6 @@
 import json
-from dataclasses import dataclass
 import sys
+from dataclasses import dataclass
 
 
 @dataclass

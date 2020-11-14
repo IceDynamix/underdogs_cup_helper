@@ -2,10 +2,11 @@ import json
 import os
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from settings_manager import settings
 
 import discord
 import requests
+
+from settings_manager import settings
 
 TETRIO_CACHE = "tetrio_cache"
 LAST_UPDATE = "last_update.json"
@@ -235,7 +236,7 @@ class tetrio_user():
         if message:
             if format_pretty:
                 message = ":red_square: You are not allowed to " +\
-                    "participate Reason: " + message
+                    "participate. Reason: " + message
             return (False, message)
         else:
             if format_pretty:
