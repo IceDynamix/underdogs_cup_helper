@@ -76,17 +76,31 @@ class tournament(commands.Cog):
             f"Registered Discord user {ctx.author} as player {username}"
         )
 
-    @commands.command(help="Unregister from the tournament if necessary")
-    async def unregister(self, ctx: commands.Context):
-        role = ctx.guild.get_role(self.settings.discord_participant_role)
+    @commands.command(
+        help="Unregister from the tournament if necessary. Staff can " +
+        "unregister players based on a Discord ID.")
+    async def unregister(self, ctx: commands.Context, discord_id: str = None):
 
-        if role not in ctx.author.roles:
+        # staff is removing the player
+        staff_role = ctx.guild.get_role(self.settings.discord_staff_role)
+        if staff_role in ctx.author.roles and discord_id:
+            discord_id = int(discord_id)
+            player_to_remove = await ctx.guild.fetch_member(discord_id)
+            if not player_to_remove:
+                await ctx.send("User not on server")
+                return
+        else:
+            player_to_remove = ctx.author
+
+        participant_role = ctx.guild.get_role(
+            self.settings.discord_participant_role)
+        if participant_role not in player_to_remove.roles:
             await ctx.send("Not registered")
             return
 
-        self.player_list.remove(ctx.author.id)
+        self.player_list.remove(player_to_remove.id)
         self.player_list.update_spreadsheet()
-        await ctx.author.remove_roles(role)
+        await ctx.author.remove_roles(participant_role)
         await ctx.send(f"Unregistered Discord user {ctx.author}")
 
     @commands.command(
@@ -102,10 +116,9 @@ class tournament(commands.Cog):
         user = tetrio_user.from_username(username)
         if not user:
             ctx.send(f"Could not find user with username {username}")
-
-        response = tetrio_user.from_username(
+        _, message = tetrio_user.from_username(
             username).can_participate(self.settings, True)
-        await ctx.send(response)
+        await ctx.send(message)
 
     @commands.command(hidden=True)
     async def player_list(self, ctx: commands.Context):
