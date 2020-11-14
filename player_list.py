@@ -1,12 +1,11 @@
 from dataclasses import dataclass
 from datetime import datetime
-from tetrio import tetrio_user
 
-import discord
 from discord.ext import commands
 
 from gsheet import spreadsheet
 from settings_manager import settings_manager
+from tetrio import tetrio_user
 
 
 @dataclass

@@ -1,8 +1,8 @@
-from dataclasses import dataclass
 import json
 import os
-import discord
+from dataclasses import dataclass
 
+import discord
 import requests
 
 TETRIO_CACHE = "tetrio_cache"

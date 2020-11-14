@@ -1,9 +1,9 @@
 from time import time
 
 import discord
+import tetrio
 from discord.ext import commands
 from settings_manager import settings_manager
-import tetrio
 
 
 class owner(commands.Cog):

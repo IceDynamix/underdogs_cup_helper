@@ -1,7 +1,6 @@
 from discord.ext import commands
+from player_list import player_list
 from settings_manager import settings_manager
-import tetrio
-from player_list import player_list, player
 from tetrio import tetrio_user
 
 
