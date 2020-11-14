@@ -186,14 +186,18 @@ class tetrio_user():
     @staticmethod
     def from_username(username: str):
         username = username.lower()
+        current_stats = tetrio_user_data.from_username(
+            username, current_playerbase_data,
+            current_player_history_data)
+        announcement_stats = tetrio_user_data.from_username(
+            username, announcement_playerbase_data,
+            announcement_player_history_data)
+        if not current_stats or not announcement_stats:
+            return None
         return tetrio_user(
             username=username,
-            current_stats=tetrio_user_data.from_username(
-                username, current_playerbase_data,
-                current_player_history_data),
-            announcement_stats=tetrio_user_data.from_username(
-                username, announcement_playerbase_data,
-                announcement_player_history_data),
+            current_stats=current_stats,
+            announcement_stats=announcement_stats,
         )
 
     def to_row(self) -> list:
@@ -226,8 +230,8 @@ class tetrio_user():
 
         if message:
             if format_pretty:
-                message = ":red_square: You are not allowed to participate. " +\
-                    "Reason: " + message
+                message = ":red_square: You are not allowed to " +\
+                    "participate Reason: " + message
             return (False, message)
         else:
             if format_pretty:

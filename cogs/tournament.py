@@ -39,14 +39,15 @@ class tournament(commands.Cog):
 
         if not username:
             username = ctx.author.display_name
-        username = username.lower()
 
         if role in ctx.author.roles or \
                 self.player_list.is_discord_registered(ctx.author.id):
             await ctx.send("Discord user already registered")
             return
         elif self.player_list.is_username_registered(username):
-            await ctx.send("Tetr.io username already registered")
+            await ctx.send(
+                "Tetr.io username already registered, please contact staff " +
+                "if you truly are the owner of the Tetr.io account")
             return
 
         player_data = tetrio_user.from_username(username)
@@ -63,8 +64,10 @@ class tournament(commands.Cog):
             return
 
         # it's going to fail if you edit the owner
-        if ctx.author.display_name != username and not commands.is_owner():
+        try:
             await ctx.author.edit(nick=username)
+        except Exception:
+            print(f"Can't change nickname of {ctx.author}")
 
         self.player_list.add(ctx.author.id, str(ctx.author), player_data)
         self.player_list.update_spreadsheet()
@@ -78,14 +81,18 @@ class tournament(commands.Cog):
         help="Unregister from the tournament if necessary. Staff can " +
         "unregister players based on a Discord ID.")
     async def unregister(self, ctx: commands.Context, discord_id: str = None):
-
-        # staff is removing the player
         staff_role = ctx.guild.get_role(settings.discord_staff_role)
-        if staff_role in ctx.author.roles and discord_id:
-            discord_id = int(discord_id)
-            player_to_remove = await ctx.guild.fetch_member(discord_id)
-            if not player_to_remove:
-                await ctx.send("User not on server")
+
+        if discord_id:
+            # staff is removing the player
+            if staff_role in ctx.author.roles:
+                discord_id = int(discord_id)
+                player_to_remove = await ctx.guild.fetch_member(discord_id)
+                if not player_to_remove:
+                    await ctx.send("User not on server")
+                    return
+            else:
+                await ctx.send("Nice try, but I can't do that for you")
                 return
         else:
             player_to_remove = ctx.author
@@ -102,6 +109,19 @@ class tournament(commands.Cog):
         await ctx.send(f"Unregistered Discord user {ctx.author}")
 
     @commands.command(
+        help="Displays basic stats of a user, if no username is given " +
+        "then it will attempt to look for your current UC Discord nickname")
+    async def stats(self, ctx: commands.Context, username: str = None):
+        if not username:
+            username = ctx.author.display_name
+
+        player = tetrio_user.from_username(username)
+        if not player:
+            await ctx.send(f"Could not find player `{username}`")
+        else:
+            await ctx.send(embed=player.current_stats.generate_embed())
+
+    @commands.command(
         name="caniparticipate",
         help="Unsure about whether you can participate?",
     )
@@ -113,10 +133,11 @@ class tournament(commands.Cog):
 
         user = tetrio_user.from_username(username)
         if not user:
-            ctx.send(f"Could not find user with username {username}")
-        _, message = tetrio_user.from_username(
-            username).can_participate(True)
-        await ctx.send(message)
+            await ctx.send(f"Could not find user with username {username}")
+        else:
+            _, message = tetrio_user.from_username(
+                username).can_participate(True)
+            await ctx.send(message)
 
     @commands.command(hidden=True)
     async def player_list(self, ctx: commands.Context):

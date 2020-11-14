@@ -11,7 +11,7 @@ class owner(commands.Cog):
         self.bot = bot
 
     async def cog_check(self, ctx: commands.Context):
-        return commands.is_owner()
+        return await self.bot.is_owner(ctx.author)
 
     @commands.command(hidden=True)
     async def echo(self, ctx: commands.Context, arg: str):
