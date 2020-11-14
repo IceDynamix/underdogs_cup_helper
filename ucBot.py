@@ -3,8 +3,6 @@ import sys
 import discord
 from discord.ext import commands
 
-from settings_manager import settings
-
 profile = sys.argv[1] if len(sys.argv) > 1 else "debug"
 ucBot = commands.Bot(command_prefix="!")
 
@@ -12,11 +10,6 @@ extensions = [
     "cogs.owner",
     "cogs.tournament"
 ]
-
-
-@ucBot.check
-async def only_in_bot_channel(ctx: commands.Context):
-    return ctx.channel.id == settings.discord_channel
 
 
 @ucBot.check

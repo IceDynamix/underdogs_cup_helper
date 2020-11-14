@@ -1,10 +1,10 @@
 from datetime import datetime
 
+import tetrio
 from discord.ext import commands, tasks
 from player_list import player_list
 from settings_manager import settings
 from tetrio import retrieve_data, tetrio_user
-import tetrio
 
 
 class tournament(commands.Cog):
@@ -32,6 +32,9 @@ class tournament(commands.Cog):
     async def on_update_cancel(self):
         if self.update_stats.is_being_cancelled():
             print(f"Could not update stats ({datetime.utcnow()})")
+
+    async def cog_check(self, ctx: commands.Context):
+        return ctx.channel.id == settings.discord_channel
 
     @commands.command(help="Registers you to the ongoing tournament")
     async def register(self, ctx: commands.Context, username: str = None):
