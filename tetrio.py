@@ -6,33 +6,37 @@ import discord
 import requests
 
 TETRIO_CACHE = "tetrio_cache"
-RANK_COLORS = {
-    "d": "856C84",
-    "dp": "815880",
-    "cm": "6C417C",
-    "c": "67287B",
-    "cp": "522278",
-    "bm": "5949BE",
-    "b": "4357B5",
-    "bp": "4880B2",
-    "am": "35AA8C",
-    "a": "3EA750",
-    "ap": "43b536",
-    "sm": "B79E2B",
-    "s": "d19e26",
-    "sp": "dbaf37",
-    "ss": "e39d3b",
-    "u": "c75c2e",
-    "x": "b852bf",
-    "z": "828282"
+RANKS = {
+    "d": {"color": "856C84", "proper": "D"},
+    "dp": {"color": "815880", "proper": "D+"},
+    "cm": {"color": "6C417C", "proper": "C-"},
+    "c": {"color": "67287B", "proper": "C"},
+    "cp": {"color": "522278", "proper": "C+"},
+    "bm": {"color": "5949BE", "proper": "B-"},
+    "b": {"color": "4357B5", "proper": "B"},
+    "bp": {"color": "4880B2", "proper": "B+"},
+    "am": {"color": "35AA8C", "proper": "A-"},
+    "a": {"color": "3EA750", "proper": "A"},
+    "ap": {"color": "43b536", "proper": "A+"},
+    "sm": {"color": "B79E2B", "proper": "S-"},
+    "s": {"color": "d19e26", "proper": "S"},
+    "sp": {"color": "dbaf37", "proper": "S+"},
+    "ss": {"color": "e39d3b", "proper": "SS"},
+    "u": {"color": "c75c2e", "proper": "U"},
+    "x": {"color": "b852bf", "proper": "X"},
+    "z": {"color": "828282", "proper": "Unranked"},
 }
 
 
-def retrieve_data(endpoint: str, use_cache: bool = True):
+def retrieve_data(endpoint: str, use_cache: bool = True, name: str = None):
     if not os.path.exists(TETRIO_CACHE):
         os.mkdir(TETRIO_CACHE)
 
-    cache_path = f"./{TETRIO_CACHE}/{endpoint}.json"
+    if name:
+        cache_path = f"./{TETRIO_CACHE}/{name}.json"
+    else:
+        cache_path = f"./{TETRIO_CACHE}/{endpoint}.json"
+
     if use_cache and os.path.exists(cache_path):
         with open(cache_path, "r") as f:
             return json.load(f)
@@ -45,7 +49,7 @@ def retrieve_data(endpoint: str, use_cache: bool = True):
 
 
 @dataclass
-class tetrio_user():
+class tetrio_user_data():
     username: str
     tetra_rating: float
     rank: str
@@ -58,13 +62,11 @@ class tetrio_user():
     games_won: int
     games_lost: int
 
-    playerbase_data = retrieve_data("players")
-
     @staticmethod
-    def from_username(username: str):
+    def from_username(username: str, playerbase_data):
         username = username.lower()
-        latest_stats = tetrio_user.playerbase_data["latest_stats"]
-        unranked_stats = tetrio_user.playerbase_data["unranked_stats"]
+        latest_stats = playerbase_data["latest_stats"]
+        unranked_stats = playerbase_data["unranked_stats"]
 
         if username in latest_stats:
             player_data = latest_stats[username]
@@ -73,7 +75,7 @@ class tetrio_user():
         else:
             return None
 
-        return tetrio_user(
+        return tetrio_user_data(
             username=username,
             tetra_rating=player_data["TR"],
             rank=player_data["rank"],
@@ -90,7 +92,7 @@ class tetrio_user():
     def generate_embed(self):
         embed = discord.Embed(
             title=self.username,
-            color=int(RANK_COLORS[self.rank], 16),
+            color=int(RANKS[self.rank]["color"], 16),
             url="https://ch.tetr.io/u/"+self.username
         )
 
@@ -113,3 +115,29 @@ class tetrio_user():
         field("VS", self.vs)
 
         return embed
+
+
+@dataclass
+class tetrio_user():
+    username: str
+    current_stats: tetrio_user_data
+    announcement_stats: tetrio_user_data
+
+    current_playerbase_data = retrieve_data("players")
+    announcement_playerbase_data = retrieve_data(
+        "players", True, "announcement")
+
+    @staticmethod
+    def from_username(username: str):
+        username = username.lower()
+        return tetrio_user(
+            username=username,
+            current_stats=tetrio_user_data.from_username(
+                username, tetrio_user.current_playerbase_data),
+            announcement_stats=tetrio_user_data.from_username(
+                username, tetrio_user.announcement_playerbase_data),
+        )
+
+
+if __name__ == "__main__":
+    retrieve_data("players", False, "announcement")

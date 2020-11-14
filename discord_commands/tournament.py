@@ -27,7 +27,7 @@ class tournament(commands.Cog):
             await ctx.send("Tetr.io username already registered")
             return
 
-        player_data = tetrio_user.from_username(username)
+        player_data = tetrio_user.from_username(username).current_stats
 
         if player_data:
             await ctx.send(embed=player_data.generate_embed())

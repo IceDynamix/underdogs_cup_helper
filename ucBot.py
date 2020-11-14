@@ -48,7 +48,10 @@ async def on_command(ctx: commands.Context):
     help="Displays basic stats of a user, if no username is given " +
     "then it will attempt to look for your current UC Discord nickname")
 async def stats(ctx: commands.Context, username: str = None):
-    player = tetrio_user.from_username(username)
+    if not username:
+        username = ctx.author.display_name
+
+    player = tetrio_user.from_username(username).current_stats
     if player:
         await ctx.send(embed=player.generate_embed())
     else:

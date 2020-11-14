@@ -7,7 +7,7 @@
         },
         "spreadsheet": {
             "spreadsheet_id": "12ofvIJ0BI80Qz_GgU35nPlbsm4MVuOzxIx1D8l5iCnM",
-            "registration_range": "regs!A2:I"
+            "registration_range": "regs!A3:N"
         }
     },
     "uc5_debug": {
@@ -18,7 +18,7 @@
         },
         "spreadsheet": {
             "spreadsheet_id": "12ofvIJ0BI80Qz_GgU35nPlbsm4MVuOzxIx1D8l5iCnM",
-            "registration_range": "regs!A2:I"
+            "registration_range": "regs!A3:N"
         }
     }
 }
