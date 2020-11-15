@@ -37,7 +37,7 @@ class spreadsheet:
 
     def read_range(self, a1notation: str) -> list:
         result = self.service.values().get(
-            spreadsheetId=settings.spreadsheet_id,
+            spreadsheetId=settings.staff_sheet_id,
             range=a1notation
         ).execute()
 
@@ -45,7 +45,7 @@ class spreadsheet:
 
     def write_range(self, a1notation: str, values: list) -> None:
         self.service.values().update(
-            spreadsheetId=settings.spreadsheet_id,
+            spreadsheetId=settings.staff_sheet_id,
             range=a1notation,
             valueInputOption="USER_ENTERED",
             body={"values": values}
@@ -53,6 +53,6 @@ class spreadsheet:
 
     def clear_range(self, a1notation) -> None:
         self.service.values().clear(
-            spreadsheetId=settings.spreadsheet_id,
+            spreadsheetId=settings.staff_sheet_id,
             range=a1notation
         ).execute()

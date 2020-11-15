@@ -18,7 +18,7 @@ class player():
     tetrio: tetrio_user
 
     @staticmethod
-    def from_row(row: list, bot: commands.Bot):
+    def from_row(row: list):
         discord_id = int(row[1])
         discord_tag = row[2]
         username = row[3]
@@ -49,15 +49,15 @@ class player():
 class player_list():
     def __init__(self, bot: commands.Bot):
         self.spreadsheet = spreadsheet()
-        self.bot = bot
         self.read_spreadsheet()
 
     def read_spreadsheet(self):
         rows = self.spreadsheet.read_range(
             settings.spreadsheet_registration_range)
+        print(f"Read {len(rows)} row(s)")
         self.player_list = [
-            player.from_row(row, self.bot)
-            for row in rows if len(row) == 14
+            player.from_row(row)
+            for row in rows
         ]
 
     def update_spreadsheet(self):

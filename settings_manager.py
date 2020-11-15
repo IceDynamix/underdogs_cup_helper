@@ -11,7 +11,8 @@ class settings_manager():
     participant_role: int
     staff_channel: int
     staff_role: int
-    spreadsheet_id: str
+    public_sheet_id: str
+    staff_sheet_id: str
     spreadsheet_registration_range: str
     rank_cap: str
 
@@ -26,7 +27,8 @@ class settings_manager():
             participant_role=profile["participant_role"],
             staff_channel=profile["staff_channel"],
             staff_role=profile["staff_role"],
-            spreadsheet_id=profile["spreadsheet_id"],
+            public_sheet_id=profile["public_sheet_id"],
+            staff_sheet_id=profile["staff_sheet_id"],
             spreadsheet_registration_range=profile["spreadsheet_registration_range"],
             rank_cap=profile["rank_cap"]
         )

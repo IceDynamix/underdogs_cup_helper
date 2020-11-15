@@ -11,7 +11,7 @@ class tournament(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.initial_update = False
-        self.player_list = player_list(bot=self.bot)
+        self.player_list = player_list(self.bot)
         self.update_stats.start()
 
     @tasks.loop(hours=6)
@@ -22,7 +22,7 @@ class tournament(commands.Cog):
         tetrio.current_playerbase_data = retrieve_data("players")
         tetrio.current_player_history_data = retrieve_data(
             "player_history")
-        self.player_list = player_list(bot=self.bot)
+        self.player_list = player_list()
 
     @update_stats.before_loop
     async def before_update_stats(self):
@@ -144,9 +144,21 @@ class tournament(commands.Cog):
             await ctx.send(message)
 
     @commands.command(hidden=True)
-    async def player_list(self, ctx: commands.Context):
-        msg = str(self.player_list)
-        if msg:
+    async def playerlist(self, ctx: commands.Context):
+
+        if settings.public_sheet_id:
+            sheet_url = "Spreadsheet: " + \
+                "https://docs.google.com/spreadsheets/d/" + \
+                settings.public_sheet_id
+        else:
+            sheet_url = "Spreadsheet coming soon!"
+
+        if len(self.player_list.player_list) > 0:
+            msg = "\n".join([
+                sheet_url,
+                f"{len(self.player_list.player_list)} player(s)",
+                str(self.player_list)
+            ])
             await ctx.send(msg)
         else:
             await ctx.send("No players")
