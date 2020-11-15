@@ -158,8 +158,7 @@ class tournament(commands.Cog):
         if len(self.player_list.player_list) > 0:
             msg = "\n".join([
                 sheet_url,
-                f"{len(self.player_list.player_list)} player(s)",
-                str(self.player_list)
+                f"{len(self.player_list.player_list)} player(s)"
             ])
             await ctx.send(msg)
         else:
