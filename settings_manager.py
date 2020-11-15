@@ -40,4 +40,4 @@ class settings_manager():
 
 
 settings = settings_manager.from_profile(
-    sys.argv[1] if len(sys.argv) > 1 else "debug")
+    sys.argv[1] if len(sys.argv) > 1 else "uc5_debug")
