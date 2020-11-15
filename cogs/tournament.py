@@ -38,6 +38,7 @@ class tournament(commands.Cog):
             ctx.channel.id == settings.staff_channel
 
     @commands.command(help="Registers you to the ongoing tournament")
+    @commands.max_concurrency(1, wait=True)
     async def register(self, ctx: commands.Context, username: str = None):
         role = ctx.guild.get_role(settings.participant_role)
 
@@ -56,11 +57,11 @@ class tournament(commands.Cog):
 
         player_data = tetrio_user.from_username(username)
 
-        if player_data.current_stats:
-            await ctx.send(embed=player_data.current_stats.generate_embed())
-        else:
+        if not player_data:
             await ctx.send(f"Could not find user with username {username}")
             return
+        else:
+            await ctx.send(embed=player_data.current_stats.generate_embed())
 
         can_participate, message = player_data.can_participate(True)
         if not can_participate:
@@ -84,6 +85,7 @@ class tournament(commands.Cog):
     @commands.command(
         help="Unregister from the tournament if necessary. Staff can " +
         "unregister players based on a Discord ID.")
+    @commands.max_concurrency(1, wait=True)
     async def unregister(self, ctx: commands.Context, discord_id: str = None):
         staff_role = ctx.guild.get_role(settings.staff_role)
 
