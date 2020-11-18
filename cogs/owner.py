@@ -3,7 +3,7 @@ from time import time
 import discord
 import tetrio
 from discord.ext import commands
-from settings_manager import settings
+from settings_manager import settings, settings_manager
 
 
 class owner(commands.Cog):
@@ -63,6 +63,12 @@ class owner(commands.Cog):
         self.bot.unload_extension(cog)
         self.bot.load_extension(cog)
         await ctx.send("Reloaded cog successfully")
+
+    @commands.command(name="reload", hidden=True)
+    async def reload_settings(self, ctx, profile: str):
+        settings_manager.settings = settings.from_profile(profile)
+        await ctx.send(
+            f"Reloaded settings from profile {profile} successfully")
 
 
 def setup(bot: commands.Bot):
