@@ -64,7 +64,7 @@ class owner(commands.Cog):
         self.bot.load_extension(cog)
         await ctx.send("Reloaded cog successfully")
 
-    @commands.command(name="reload", hidden=True)
+    @commands.command(name="settings", hidden=True)
     async def reload_settings(self, ctx, profile: str):
         settings_manager.settings = settings.from_profile(profile)
         await ctx.send(
