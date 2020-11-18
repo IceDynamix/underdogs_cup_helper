@@ -145,7 +145,7 @@ class tournament(commands.Cog):
                 username).can_participate(True)
             await ctx.send(message)
 
-    @commands.command(hidden=True)
+    @commands.command()
     async def playerlist(self, ctx: commands.Context):
 
         if settings.public_sheet_id:
